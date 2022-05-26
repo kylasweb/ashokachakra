@@ -20,7 +20,7 @@ Note: Ashoka Chakra Core is considered beta software. We make no warranties or g
 
 *	EVM smart contracts cannot receive coins from or send coins to any address type other than pay-to-pubkeyhash (starts with Q) addresses. This is due to a limitation in the EVM
 *	Contracts are not allowed to create contracts with an initial endowment of coins. The contract must first be created, and then be sent coins in a separate transaction. Humans are also not allowed to create contracts with an initial endowment of coins.
-*	Although all of the infrastructure is present, Qtum Core does not currently parse Solidity event data. You must parse this yourself using either searchlogs or -record-log-opcodes features.
+*	Although all of the infrastructure is present, Ashoka Chakra Core does not currently parse Solidity event data. You must parse this yourself using either searchlogs or -record-log-opcodes features.
 *	It is not possible to send a contract coins without also executing the contract. This is also the case of Ethereum. This was promised in earlier discussions and technically does work, but due to lack of time for testing this feature was disabled. We hope to reenable this feature with release of the x86 virtual machine in 2020.
 *	In Qtum there can be multiple addresses used to create a proof-of-stake block. However, the EVM can only see the first output using the coinbase operation in Solidity (this address is also the one registered for the continuous staker rewards after 500 blocks).
 
@@ -30,11 +30,11 @@ Note: Ashoka Chakra Core is considered beta software. We make no warranties or g
 
 ### Validate and Reproduce Binaries
 
-Ashoka Chakra uses a tool called Gitian to make reproducible builds that can be verified by anyone. Instructions on setting up a Gitian VM and building Qtum are provided in [Gitan Building](https://github.com/qtumproject/qtum/blob/master/doc/gitian-building.md)
+Ashoka Chakra uses a tool called Gitian to make reproducible builds that can be verified by anyone. Instructions on setting up a Gitian VM and building Qtum are provided in [Gitan Building](https://github.com/kylasweb/ashokachakra/blob/master/doc/gitian-building.md)
 
 ### Build on Ubuntu
 
-This is a quick start script for compiling Qtum on Ubuntu
+This is a quick start script for compiling Ashoka Chakra on Ubuntu
 
 
     sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils git cmake libboost-all-dev libgmp3-dev
@@ -46,7 +46,7 @@ This is a quick start script for compiling Qtum on Ubuntu
     # If you want to build the Qt GUI:
     sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler qrencode
 
-    git clone https://github.com/qtumproject/qtum --recursive
+    git clone https://github.com/kylasweb/ashokachakra --recursive
     cd qtum
 
     # Note autogen will prompt to install some more dependencies if needed
@@ -56,7 +56,7 @@ This is a quick start script for compiling Qtum on Ubuntu
     
 ### Build on CentOS
 
-Here is a brief description for compiling Ashoka Chakra on CentOS, for more details please refer to [the specific document](https://github.com/qtumproject/qtum/blob/master/doc/build-unix.md)
+Here is a brief description for compiling Ashoka Chakra on CentOS, for more details please refer to [the specific document](https://github.com/kylasweb/ashokachakra/blob/master/doc/build-unix.md)
 
     # Compiling boost manually
     sudo yum install python-devel bzip2-devel
@@ -68,15 +68,15 @@ Here is a brief description for compiling Ashoka Chakra on CentOS, for more deta
     ./b2 headers
     sudo ./b2 -j4 install
     
-    # Installing Dependencies for Qtum
+    # Installing Dependencies for Ashoka Chakra
     sudo yum install epel-release
     sudo yum install libtool libdb4-cxx-devel openssl-devel libevent-devel gmp-devel
     
     # If you want to build the Qt GUI:
     sudo yum install qt5-qttools-devel protobuf-devel qrencode-devel
     
-    # Building Qtum
-    git clone --recursive https://github.com/qtumproject/qtum.git
+    # Building Ashoka Chakra
+    git clone --recursive https://github.com/kylasweb/ashokachakra.git
     cd qtum
     ./autogen.sh
     ./configure
@@ -105,14 +105,14 @@ NOTE: Building with Qt4 is still supported, however, could result in a broken UI
 
 #### Build Ashoka Chakra Core
 
-1. Clone the qtum source code and cd into `qtum`
+1. Clone the Ashoka Chakra source code and cd into `qtum`
 
-        git clone --recursive https://github.com/qtumproject/qtum.git
+        git clone --recursive https://github.com/kylasweb/ashokachakra.git
         cd qtum
 
 2.  Build Ashoka Chakra-core:
 
-    Configure and build the headless qtum binaries as well as the GUI (if Qt is found).
+    Configure and build the headless Ashoka Chakra binaries as well as the GUI (if Qt is found).
 
     You can disable the GUI build by passing `--without-gui` to configure.
 
@@ -126,7 +126,7 @@ NOTE: Building with Qt4 is still supported, however, could result in a broken UI
 
 ### Run
 
-Then you can either run the command-line daemon using `src/qtumd` and `src/qtum-cli`, or you can run the Qt GUI using `src/qt/qtum-qt`
+Then you can either run the command-line daemon using `src/qtumd` and `src/qtum-cli`, or you can run the Ac GUI using `src/qt/qtum-qt`
 
 License
 -------
@@ -137,10 +137,10 @@ Development Process
 -------------------
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/qtumproject/qtum/tags) are created
-regularly to indicate new official, stable release versions of Qtum.
+completely stable. [Tags](https://github.com/kylasweb/ashokachakra/tags) are created
+regularly to indicate new official, stable release versions of Ashoka Chakra.
 
-The contribution workflow is described in [CONTRIBUTING.md](https://github.com/qtumproject/qtum/blob/master/CONTRIBUTING.md)
+The contribution workflow is described in [CONTRIBUTING.md](https://github.com/kylasweb/ashokachakra/blob/master/CONTRIBUTING.md)
 and useful hints for developers can be found in [doc/developer-notes.md](doc/developer-notes.md).
 
 Testing
