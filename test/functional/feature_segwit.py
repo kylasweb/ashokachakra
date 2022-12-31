@@ -36,10 +36,7 @@ WIT_V0 = 0
 WIT_V1 = 1
 
 def getutxo(txid):
-    utxo = {}
-    utxo["vout"] = 0
-    utxo["txid"] = txid
-    return utxo
+    return {"vout": 0, "txid": txid}
 
 def find_unspent(node, min_value):
     for utxo in node.listunspent():
@@ -51,7 +48,9 @@ def find_spendable_utxo(node, min_value):
         if utxo['spendable']:
             return utxo
 
-    raise AssertionError("Unspent output equal or higher than %s not found" % min_value)
+    raise AssertionError(
+        f"Unspent output equal or higher than {min_value} not found"
+    )
 
 txs_mined = {} # txindex from txid to blockhash
 

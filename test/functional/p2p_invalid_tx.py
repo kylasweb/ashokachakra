@@ -60,11 +60,9 @@ class InvalidTxRequestTest(BitcoinTestFramework):
         height = 1
         block = create_block(tip, create_coinbase(height), block_time)
         block.solve()
-        # Save the coinbase for later
-        block1 = block
         tip = block.sha256
-        node.p2p.send_blocks_and_test([block], node, success=True)
-
+        block1 = block
+        node.p2p.send_blocks_and_test([block1], node, success=True)
         self.log.info("Mature the block.")
         self.nodes[0].generatetoaddress(COINBASE_MATURITY, self.nodes[0].get_deterministic_priv_key().address)
 
@@ -146,7 +144,7 @@ class InvalidTxRequestTest(BitcoinTestFramework):
         # tx_orphan_no_fee, because it has too low fee (p2ps[0] is not disconnected for relaying that tx)
         # tx_orphan_invaid, because it has negative fee (p2ps[1] is disconnected for relaying that tx)
 
-        wait_until(lambda: 1 == len(node.getpeerinfo()), timeout=12)  # p2ps[1] is no longer connected
+        wait_until(lambda: len(node.getpeerinfo()) == 1, timeout=12)
         assert_equal(expected_mempool, set(node.getrawmempool()))
 
 

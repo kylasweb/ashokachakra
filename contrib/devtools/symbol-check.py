@@ -149,7 +149,7 @@ def read_symbols(executable, imports=True) -> List[Tuple[str, str, str]]:
     p = subprocess.Popen([READELF_CMD, '--dyn-syms', '-W', '-h', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
     (stdout, stderr) = p.communicate()
     if p.returncode:
-        raise IOError('Could not read symbols for {}: {}'.format(executable, stderr.strip()))
+        raise IOError(f'Could not read symbols for {executable}: {stderr.strip()}')
     syms = []
     for line in stdout.splitlines():
         line = line.split()
@@ -170,8 +170,8 @@ def check_version(max_versions, version, arch) -> bool:
     else:
         lib = version
         ver = '0'
-    ver = tuple([int(x) for x in ver.split('.')])
-    if not lib in max_versions:
+    ver = tuple(int(x) for x in ver.split('.'))
+    if lib not in max_versions:
         return False
     return ver <= max_versions[lib] or lib == 'GLIBC' and ver <= ARCH_MIN_GLIBC_VER[arch]
 
@@ -184,9 +184,10 @@ def elf_read_libraries(filename) -> List[str]:
     for line in stdout.splitlines():
         tokens = line.split()
         if len(tokens)>2 and tokens[1] == '(NEEDED)':
-            match = re.match(r'^Shared library: \[(.*)\]$', ' '.join(tokens[2:]))
-            if match:
-                libraries.append(match.group(1))
+            if match := re.match(
+                r'^Shared library: \[(.*)\]$', ' '.join(tokens[2:])
+            ):
+                libraries.append(match[1])
             else:
                 raise ValueError('Unparseable (NEEDED) specification')
     return libraries
@@ -196,7 +197,7 @@ def check_imported_symbols(filename) -> bool:
     ok = True
     for sym, version, arch in read_symbols(filename, True):
         if version and not check_version(MAX_VERSIONS, version, arch):
-            print('{}: symbol {} from unsupported version {}'.format(filename, cppfilt(sym), version))
+            print(f'{filename}: symbol {cppfilt(sym)} from unsupported version {version}')
             ok = False
     return ok
 
@@ -206,7 +207,7 @@ def check_exported_symbols(filename) -> bool:
     for sym,version,arch in read_symbols(filename, False):
         if arch == 'RISC-V' or sym in IGNORE_EXPORTS:
             continue
-        print('{}: export of symbol {} not allowed'.format(filename, cppfilt(sym)))
+        print(f'{filename}: export of symbol {cppfilt(sym)} not allowed')
         ok = False
     return ok
 
@@ -214,7 +215,7 @@ def check_ELF_libraries(filename) -> bool:
     ok = True
     for library_name in elf_read_libraries(filename):
         if library_name not in ELF_ALLOWED_LIBRARIES:
-            print('{}: NEEDED library {} is not allowed'.format(filename, library_name))
+            print(f'{filename}: NEEDED library {library_name} is not allowed')
             ok = False
     return ok
 
@@ -235,7 +236,7 @@ def check_MACHO_libraries(filename) -> bool:
     ok = True
     for dylib in macho_read_libraries(filename):
         if dylib not in MACHO_ALLOWED_LIBRARIES:
-            print('{} is not in ALLOWED_LIBRARIES!'.format(dylib))
+            print(f'{dylib} is not in ALLOWED_LIBRARIES!')
             ok = False
     return ok
 
@@ -255,7 +256,7 @@ def check_PE_libraries(filename) -> bool:
     ok = True
     for dylib in pe_read_libraries(filename):
         if dylib not in PE_ALLOWED_LIBRARIES:
-            print('{} is not in ALLOWED_LIBRARIES!'.format(dylib))
+            print(f'{dylib} is not in ALLOWED_LIBRARIES!')
             ok = False
     return ok
 
@@ -290,18 +291,16 @@ if __name__ == '__main__':
         try:
             etype = identify_executable(filename)
             if etype is None:
-                print('{}: unknown format'.format(filename))
+                print(f'{filename}: unknown format')
                 retval = 1
                 continue
 
-            failed = []
-            for (name, func) in CHECKS[etype]:
-                if not func(filename):
-                    failed.append(name)
-            if failed:
-                print('{}: failed {}'.format(filename, ' '.join(failed)))
+            if failed := [
+                name for name, func in CHECKS[etype] if not func(filename)
+            ]:
+                print(f"{filename}: failed {' '.join(failed)}")
                 retval = 1
         except IOError:
-            print('{}: cannot open'.format(filename))
+            print(f'{filename}: cannot open')
             retval = 1
     sys.exit(retval)

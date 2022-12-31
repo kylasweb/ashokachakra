@@ -68,7 +68,7 @@ class TxDownloadTest(BitcoinTestFramework):
         for p in self.nodes[0].p2ps:
             p.send_and_ping(msg)
 
-        outstanding_peer_index = [i for i in range(len(self.nodes[0].p2ps))]
+        outstanding_peer_index = list(range(len(self.nodes[0].p2ps)))
 
         def getdata_found(peer_index):
             p = self.nodes[0].p2ps[peer_index]
@@ -104,7 +104,8 @@ class TxDownloadTest(BitcoinTestFramework):
         txid = int(ctx.rehash(), 16)
 
         self.log.info(
-            "Announce the transaction to all nodes from all {} incoming peers, but never send it".format(NUM_INBOUND))
+            f"Announce the transaction to all nodes from all {NUM_INBOUND} incoming peers, but never send it"
+        )
         msg = msg_inv([CInv(t=1, h=txid)])
         for p in self.peers:
             p.send_and_ping(msg)
@@ -123,13 +124,14 @@ class TxDownloadTest(BitcoinTestFramework):
         assert self.nodes[1].getpeerinfo()[0]['inbound'] == False
         timeout = 2 + (MAX_GETDATA_RANDOM_DELAY + INBOUND_PEER_TX_DELAY) + (
             GETDATA_TX_INTERVAL + MAX_GETDATA_RANDOM_DELAY)
-        self.log.info("Tx should be received at node 1 after {} seconds".format(timeout))
+        self.log.info(f"Tx should be received at node 1 after {timeout} seconds")
         self.sync_mempools(timeout=timeout)
 
     def test_in_flight_max(self):
-        self.log.info("Test that we don't request more than {} transactions from any peer, every {} minutes".format(
-            MAX_GETDATA_IN_FLIGHT, TX_EXPIRY_INTERVAL / 60))
-        txids = [i for i in range(MAX_GETDATA_IN_FLIGHT + 2)]
+        self.log.info(
+            f"Test that we don't request more than {MAX_GETDATA_IN_FLIGHT} transactions from any peer, every {TX_EXPIRY_INTERVAL / 60} minutes"
+        )
+        txids = list(range(MAX_GETDATA_IN_FLIGHT + 2))
 
         p = self.nodes[0].p2ps[0]
 
@@ -148,7 +150,9 @@ class TxDownloadTest(BitcoinTestFramework):
             assert_equal(p.tx_getdata_count, MAX_GETDATA_IN_FLIGHT + 1)
 
         WAIT_TIME = TX_EXPIRY_INTERVAL // 2 + TX_EXPIRY_INTERVAL
-        self.log.info("if we wait about {} minutes, we should eventually get more requests".format(WAIT_TIME / 60))
+        self.log.info(
+            f"if we wait about {WAIT_TIME / 60} minutes, we should eventually get more requests"
+        )
         self.nodes[0].setmocktime(int(time.time() + WAIT_TIME))
         wait_until(lambda: p.tx_getdata_count == MAX_GETDATA_IN_FLIGHT + 2)
         self.nodes[0].setmocktime(0)
@@ -157,10 +161,10 @@ class TxDownloadTest(BitcoinTestFramework):
         # Setup the p2p connections
         self.peers = []
         for node in self.nodes:
-            for i in range(NUM_INBOUND):
-                self.peers.append(node.add_p2p_connection(TestP2PConn()))
-
-        self.log.info("Nodes are setup with {} incoming connections each".format(NUM_INBOUND))
+            self.peers.extend(
+                node.add_p2p_connection(TestP2PConn()) for _ in range(NUM_INBOUND)
+            )
+        self.log.info(f"Nodes are setup with {NUM_INBOUND} incoming connections each")
 
         # Test the in-flight max first, because we want no transactions in
         # flight ahead of this test.

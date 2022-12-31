@@ -49,7 +49,7 @@ class Qtum8MBBlock(BitcoinTestFramework):
         parent_tx = CTransaction()
         parent_tx.vin.append(CTxIn(prevout, b""))
         child_value = int(value/NUM_OUTPUTS)
-        for i in range(NUM_OUTPUTS):
+        for _ in range(NUM_OUTPUTS):
             parent_tx.vout.append(CTxOut(child_value, scriptPubKey))
         parent_tx.vout[0].nValue -= 50000
         assert(parent_tx.vout[0].nValue > 0)
@@ -59,7 +59,7 @@ class Qtum8MBBlock(BitcoinTestFramework):
         for i in range(NUM_OUTPUTS):
             child_tx.vin.append(CTxIn(COutPoint(parent_tx.sha256, i), b""))
         child_tx.vout = [CTxOut(value - 100000, CScript([OP_TRUE]))]
-        for i in range(NUM_OUTPUTS):
+        for _ in range(NUM_OUTPUTS):
             child_tx.wit.vtxinwit.append(CTxInWitness())
             child_tx.wit.vtxinwit[-1].scriptWitness.stack = [b'a'*195]*(2*NUM_DROPS) + [witness_program]
         child_tx.rehash()

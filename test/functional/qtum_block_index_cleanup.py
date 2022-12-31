@@ -97,9 +97,9 @@ class QtumBlockIndexCleanupTest(BitcoinTestFramework):
         self.node.importprivkey(privkey)
         for n in self.nodes:
             n.setmocktime(int(time.time())-100000)
-        
+
         generatesynchronized(self.node, 4*COINBASE_MATURITY, "qSrM9K6FMhZ29Vkp8Rdk8Jp66bbfpjFETq", self.nodes)
-        
+
         for n in self.nodes:
             n.setmocktime(0)
         self.sync_all()
@@ -115,14 +115,14 @@ class QtumBlockIndexCleanupTest(BitcoinTestFramework):
         for n in self.nodes:
             n.reconsiderblock(bhash)
         print('after reconsider', self.node.getbestblockhash())
-        for i, block in enumerate(blocks[1:]):
+        for block in blocks[1:]:
             print(self.node.submitblock(bytes_to_hex_str(block.serialize())))
         print(self.node.getchaintips())
         print('syncing')
         print(bhash)
         time.sleep(2)
         for i, n in enumerate(self.nodes):
-            print("checking node#" + str(i))
+            print(f"checking node#{str(i)}")
             print(n.getchaintips())
         self.sync_all()
         print(bhash)

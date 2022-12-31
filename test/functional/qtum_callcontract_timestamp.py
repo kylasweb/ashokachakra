@@ -38,13 +38,13 @@ class QtumCallContractTimestampTest(BitcoinTestFramework):
         now = int(time.time())
         expected_now = int(self.node.callcontract(self.contract_address, "b80777ea")['executionResult']['output'], 16)
         print(now, expected_now)
-        assert(expected_now == now or expected_now == now+1)
+        assert expected_now in [now, now+1]
         activate_mpos(self.node)
         self.node.setmocktime(0)
         now = int(time.time())
         expected_now = int(self.node.callcontract(self.contract_address, "b80777ea")['executionResult']['output'], 16)
         print(now, expected_now)
-        assert(expected_now == now or expected_now == now+1)
+        assert expected_now in [now, now+1]
 
 if __name__ == '__main__':
     QtumCallContractTimestampTest().main()

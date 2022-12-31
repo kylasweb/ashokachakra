@@ -169,13 +169,13 @@ class BIP68_112_113Test(BitcoinTestFramework):
 
     def generate_blocks(self, number):
         test_blocks = []
-        for i in range(number):
+        extend_txs = []
+        for _ in range(number):
             block = self.create_test_block([])
             test_blocks.append(block)
             self.last_block_time += 600
             self.tip = block.sha256
             self.tipheight += 1
-            extend_txs = []
         return test_blocks
 
     def create_test_block(self, txs):

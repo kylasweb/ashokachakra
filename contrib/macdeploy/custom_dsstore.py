@@ -42,10 +42,12 @@ icvp = {
 }
 alias = Alias.from_bytes(icvp['backgroundImageAlias'])
 alias.volume.name = package_name_ns
-alias.volume.posix_path = '/Volumes/' + package_name_ns
-alias.volume.disk_image_alias.target.filename = package_name_ns + '.temp.dmg'
+alias.volume.posix_path = f'/Volumes/{package_name_ns}'
+alias.volume.disk_image_alias.target.filename = f'{package_name_ns}.temp.dmg'
 alias.volume.disk_image_alias.target.carbon_path = 'Macintosh HD:Users:\x00qtumuser:\x00Documents:\x00qtum:\x00qtum:\x00' + package_name_ns + '.temp.dmg'
-alias.volume.disk_image_alias.target.posix_path = 'Users/qtumuser/Documents/qtum/qtum/' + package_name_ns + '.temp.dmg'
+alias.volume.disk_image_alias.target.posix_path = (
+    f'Users/qtumuser/Documents/qtum/qtum/{package_name_ns}.temp.dmg'
+)
 alias.target.carbon_path = package_name_ns + ':.background:\x00background.tiff'
 icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
 ds['.']['icvp'] = icvp

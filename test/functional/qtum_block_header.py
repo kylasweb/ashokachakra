@@ -48,11 +48,7 @@ class QtumBlockHeaderTest(BitcoinTestFramework):
 
         #node.generate(COINBASE_MATURITY+50)
         mocktime = COINBASE_MATURITY+50
-        spendable_addresses = []
-        # store some addresses to use later
-        for unspent in node.listunspent():
-            spendable_addresses.append(unspent['address'])
-
+        spendable_addresses = [unspent['address'] for unspent in node.listunspent()]
         # first make sure that what is a valid block is accepted
         coinbase = create_coinbase(node.getblockcount()+1)
         coinbase.rehash()
@@ -63,7 +59,7 @@ class QtumBlockHeaderTest(BitcoinTestFramework):
 
         coinbase = create_coinbase(node.getblockcount()+1)
         coinbase.rehash()
- 
+
         # A block that has an OP_CREATE tx, butwith an incorrect state root
         """
             pragma solidity ^0.4.11;

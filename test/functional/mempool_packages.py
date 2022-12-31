@@ -33,8 +33,8 @@ class MempoolPackagesTest(BitcoinTestFramework):
             ],
             [
                 "-maxorphantx=1000",
-                "-limitancestorcount={}".format(MAX_ANCESTORS_CUSTOM),
-                "-limitdescendantcount={}".format(MAX_DESCENDANTS_CUSTOM),
+                f"-limitancestorcount={MAX_ANCESTORS_CUSTOM}",
+                f"-limitdescendantcount={MAX_DESCENDANTS_CUSTOM}",
             ],
         ]
 
@@ -46,9 +46,7 @@ class MempoolPackagesTest(BitcoinTestFramework):
     def chain_transaction(self, node, parent_txid, vout, value, fee, num_outputs):
         send_value = satoshi_round((value - fee)/num_outputs)
         inputs = [ {'txid' : parent_txid, 'vout' : vout} ]
-        outputs = {}
-        for i in range(num_outputs):
-            outputs[node.getnewaddress()] = send_value
+        outputs = {node.getnewaddress(): send_value for _ in range(num_outputs)}
         rawtx = node.createrawtransaction(inputs, outputs)
         signedtx = node.signrawtransactionwithwallet(rawtx)
         txid = node.sendrawtransaction(signedtx['hex'])

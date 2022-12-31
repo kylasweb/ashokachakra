@@ -81,16 +81,10 @@ def check_ELF_RELRO(executable):
     GNU_RELRO program header must exist
     Dynamic section must have BIND_NOW flag
     '''
-    have_gnu_relro = False
-    for (typ, flags) in get_ELF_program_headers(executable):
-        # Note: not checking flags == 'R': here as linkers set the permission differently
-        # This does not affect security: the permission flags of the GNU_RELRO program header are ignored, the PT_LOAD header determines the effective permissions.
-        # However, the dynamic linker need to write to this area so these are RW.
-        # Glibc itself takes care of mprotecting this area R after relocations are finished.
-        # See also https://marc.info/?l=binutils&m=1498883354122353
-        if typ == 'GNU_RELRO':
-            have_gnu_relro = True
-
+    have_gnu_relro = any(
+        typ == 'GNU_RELRO'
+        for typ, flags in get_ELF_program_headers(executable)
+    )
     have_bindnow = False
     p = subprocess.Popen([READELF_CMD, '-d', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
     (stdout, stderr) = p.communicate()
@@ -110,11 +104,7 @@ def check_ELF_Canary(executable):
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
-    ok = False
-    for line in stdout.splitlines():
-        if '__stack_chk_fail' in line:
-            ok = True
-    return ok
+    return any('__stack_chk_fail' in line for line in stdout.splitlines())
 
 def get_PE_dll_characteristics(executable):
     '''
@@ -184,27 +174,21 @@ def check_MACHO_PIE(executable) -> bool:
     Check for position independent executable (PIE), allowing for address space randomization.
     '''
     flags = get_MACHO_executable_flags(executable)
-    if 'PIE' in flags:
-        return True
-    return False
+    return 'PIE' in flags
 
 def check_MACHO_NOUNDEFS(executable) -> bool:
     '''
     Check for no undefined references.
     '''
     flags = get_MACHO_executable_flags(executable)
-    if 'NOUNDEFS' in flags:
-        return True
-    return False
+    return 'NOUNDEFS' in flags
 
 def check_MACHO_NX(executable) -> bool:
     '''
     Check for no stack execution
     '''
     flags = get_MACHO_executable_flags(executable)
-    if 'ALLOW_STACK_EXECUTION' in flags:
-        return False
-    return True
+    return 'ALLOW_STACK_EXECUTION' not in flags
 
 def check_MACHO_LAZY_BINDINGS(executable) -> bool:
     '''
@@ -218,9 +202,10 @@ def check_MACHO_LAZY_BINDINGS(executable) -> bool:
 
     for line in stdout.splitlines():
         tokens = line.split()
-        if 'lazy_bind_off' in tokens or 'lazy_bind_size' in tokens:
-            if tokens[1] != '0':
-                return False
+        if (
+            'lazy_bind_off' in tokens or 'lazy_bind_size' in tokens
+        ) and tokens[1] != '0':
+            return False
     return True
 
 CHECKS = {
@@ -262,7 +247,7 @@ if __name__ == '__main__':
         try:
             etype = identify_executable(filename)
             if etype is None:
-                print('%s: unknown format' % filename)
+                print(f'{filename}: unknown format')
                 retval = 1
                 continue
 
@@ -275,12 +260,12 @@ if __name__ == '__main__':
                     else:
                         failed.append(name)
             if failed:
-                print('%s: failed %s' % (filename, ' '.join(failed)))
+                print(f"{filename}: failed {' '.join(failed)}")
                 retval = 1
             if warning:
-                print('%s: warning %s' % (filename, ' '.join(warning)))
+                print(f"{filename}: warning {' '.join(warning)}")
         except IOError:
-            print('%s: cannot open' % filename)
+            print(f'{filename}: cannot open')
             retval = 1
     sys.exit(retval)
 

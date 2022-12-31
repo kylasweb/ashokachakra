@@ -19,7 +19,10 @@ class TestBitcoinCli(BitcoinTestFramework):
         """Main test logic"""
 
         cli_response = self.nodes[0].cli("-version").send_cli()
-        assert "{} RPC client version".format(self.config['environment']['PACKAGE_NAME']) in cli_response
+        assert (
+            f"{self.config['environment']['PACKAGE_NAME']} RPC client version"
+            in cli_response
+        )
 
         self.log.info("Compare responses from getwalletinfo RPC and `bitcoin-cli getwalletinfo`")
         if self.is_wallet_compiled():
@@ -35,12 +38,39 @@ class TestBitcoinCli(BitcoinTestFramework):
         user, password = get_auth_cookie(self.nodes[0].datadir, self.chain)
 
         self.log.info("Test -stdinrpcpass option")
-        assert_equal(0, self.nodes[0].cli('-rpcuser=%s' % user, '-stdinrpcpass', input=password).getblockcount())
-        assert_raises_process_error(1, "Incorrect rpcuser or rpcpassword", self.nodes[0].cli('-rpcuser=%s' % user, '-stdinrpcpass', input="foo").echo)
+        assert_equal(
+            0,
+            self.nodes[0]
+            .cli(f'-rpcuser={user}', '-stdinrpcpass', input=password)
+            .getblockcount(),
+        )
+        assert_raises_process_error(
+            1,
+            "Incorrect rpcuser or rpcpassword",
+            self.nodes[0]
+            .cli(f'-rpcuser={user}', '-stdinrpcpass', input="foo")
+            .echo,
+        )
 
         self.log.info("Test -stdin and -stdinrpcpass")
-        assert_equal(["foo", "bar"], self.nodes[0].cli('-rpcuser=%s' % user, '-stdin', '-stdinrpcpass', input=password + "\nfoo\nbar").echo())
-        assert_raises_process_error(1, "Incorrect rpcuser or rpcpassword", self.nodes[0].cli('-rpcuser=%s' % user, '-stdin', '-stdinrpcpass', input="foo").echo)
+        assert_equal(
+            ["foo", "bar"],
+            self.nodes[0]
+            .cli(
+                f'-rpcuser={user}',
+                '-stdin',
+                '-stdinrpcpass',
+                input=password + "\nfoo\nbar",
+            )
+            .echo(),
+        )
+        assert_raises_process_error(
+            1,
+            "Incorrect rpcuser or rpcpassword",
+            self.nodes[0]
+            .cli(f'-rpcuser={user}', '-stdin', '-stdinrpcpass', input="foo")
+            .echo,
+        )
 
         self.log.info("Test connecting to a non-existing server")
         assert_raises_process_error(1, "Could not connect to the server", self.nodes[0].cli('-rpcport=1').echo)

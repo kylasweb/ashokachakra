@@ -28,7 +28,7 @@ class CLazyNode(P2PInterface):
 
     def bad_message(self, message):
         self.unexpected_msg = True
-        self.log.info("should not have received message: %s" % message.command)
+        self.log.info(f"should not have received message: {message.command}")
 
     def on_open(self):
         self.ever_connected = True
@@ -62,7 +62,7 @@ class CNodeNoVersionBan(CLazyNode):
     # NOTE: implementation-specific check here. Remove if bitcoind ban behavior changes
     def on_open(self):
         super().on_open()
-        for i in range(banscore):
+        for _ in range(banscore):
             self.send_message(msg_verack())
 
     def on_reject(self, message): pass
@@ -93,7 +93,7 @@ class CNodeNoVerackIdle(CLazyNode):
 class P2PLeakTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
-        self.extra_args = [['-banscore=' + str(banscore)]]
+        self.extra_args = [[f'-banscore={str(banscore)}']]
 
     def run_test(self):
         no_version_bannode = self.nodes[0].add_p2p_connection(CNodeNoVersionBan(), send_version=False, wait_for_verack=False)
