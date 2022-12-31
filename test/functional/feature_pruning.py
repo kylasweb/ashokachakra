@@ -108,7 +108,7 @@ class PruneTest(BitcoinTestFramework):
         connect_nodes(self.nodes[0], 2)
         connect_nodes(self.nodes[0], 3)
         connect_nodes(self.nodes[0], 4)
-        self.sync_blocks(self.nodes[0:5])
+        self.sync_blocks(self.nodes[:5])
 
     def setup_nodes(self):
         self.add_nodes(self.num_nodes, self.extra_args)
@@ -119,13 +119,13 @@ class PruneTest(BitcoinTestFramework):
     def create_big_chain(self):
         # Start by creating some coinbases we can spend later
         self.nodes[1].generate(200)
-        self.sync_blocks(self.nodes[0:2])
+        self.sync_blocks(self.nodes[:2])
         self.nodes[0].generate(150)
 
         # Then mine enough full blocks to create more than 550MiB of data
         mine_large_blocks(self.nodes[0], 645)
 
-        self.sync_blocks(self.nodes[0:5])
+        self.sync_blocks(self.nodes[:5])
 
     def test_height_min(self):
         assert os.path.isfile(os.path.join(self.prunedir, "blk00000.dat")), "blk00000.dat is missing, pruning too early"
@@ -147,7 +147,7 @@ class PruneTest(BitcoinTestFramework):
         # Create stale blocks in manageable sized chunks
         self.log.info("Mine 24 (stale) blocks on Node 1, followed by 25 (main chain) block reorg from Node 0, for 12 rounds")
 
-        for j in range(12):
+        for _ in range(12):
             # Disconnect node 0 so it can mine a longer reorg chain without knowing about node 1's soon-to-be-stale chain
             # Node 2 stays connected, so it hears about the stale blocks and then reorg's when node0 reconnects
             disconnect_nodes(self.nodes[0], 1)
@@ -161,7 +161,7 @@ class PruneTest(BitcoinTestFramework):
             # Create connections in the order so both nodes can see the reorg at the same time
             connect_nodes(self.nodes[0], 1)
             connect_nodes(self.nodes[0], 2)
-            self.sync_blocks(self.nodes[0:3])
+            self.sync_blocks(self.nodes[:3])
 
         self.log.info("Usage can be over target because of high stale rate: %d" % calc_usage(self.prunedir))
 
@@ -198,7 +198,7 @@ class PruneTest(BitcoinTestFramework):
         self.log.info("Reconnect nodes")
         connect_nodes(self.nodes[0], 1)
         connect_nodes(self.nodes[1], 2)
-        self.sync_blocks(self.nodes[0:3], timeout=120)
+        self.sync_blocks(self.nodes[:3], timeout=120)
 
         self.log.info("Verify height on node 2: %d" % self.nodes[2].getblockcount())
         self.log.info("Usage possibly still high because of stale blocks in block files: %d" % calc_usage(self.prunedir))
@@ -206,7 +206,7 @@ class PruneTest(BitcoinTestFramework):
         self.log.info("Mine 220 more large blocks so we have requisite history")
 
         mine_large_blocks(self.nodes[0], 220)
-        self.sync_blocks(self.nodes[0:3], timeout=120)
+        self.sync_blocks(self.nodes[:3], timeout=120)
 
         usage = calc_usage(self.prunedir)
         self.log.info("Usage should be below target: %d" % usage)

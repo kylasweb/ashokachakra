@@ -127,7 +127,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         out_value = total_value // 10
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(block.vtx[0].sha256, 0), b''))
-        for i in range(10):
+        for _ in range(10):
             tx.vout.append(CTxOut(out_value, CScript([OP_TRUE])))
         tx.rehash()
 
@@ -275,7 +275,7 @@ class CompactBlocksTest(BitcoinTestFramework):
             node.generate(1)
 
         segwit_tx_generated = False
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             txid = node.sendtoaddress(address, 0.2)
             hex_tx = node.gettransaction(txid)["hex"]
             tx = FromHex(CTransaction(), hex_tx)
@@ -393,9 +393,7 @@ class CompactBlocksTest(BitcoinTestFramework):
             if announce == "inv":
                 test_node.send_message(msg_inv([CInv(2, block.sha256)]))
                 wait_until(lambda: "getheaders" in test_node.last_message, timeout=30, lock=mininode_lock)
-                test_node.send_header_for_blocks([block])
-            else:
-                test_node.send_header_for_blocks([block])
+            test_node.send_header_for_blocks([block])
             wait_until(lambda: "getdata" in test_node.last_message, timeout=30, lock=mininode_lock)
             assert_equal(len(test_node.last_message["getdata"].inv), 1)
             assert_equal(test_node.last_message["getdata"].inv[0].type, 4)
@@ -419,10 +417,7 @@ class CompactBlocksTest(BitcoinTestFramework):
             assert_equal(absolute_indexes, [0])  # should be a coinbase request
 
             # Send the coinbase, and verify that the tip advances.
-            if version == 2:
-                msg = msg_blocktxn()
-            else:
-                msg = msg_no_witness_blocktxn()
+            msg = msg_blocktxn() if version == 2 else msg_no_witness_blocktxn()
             msg.block_transactions.blockhash = block.sha256
             msg.block_transactions.transactions = [block.vtx[0]]
             test_node.send_and_ping(msg)
@@ -432,7 +427,7 @@ class CompactBlocksTest(BitcoinTestFramework):
     def build_block_with_transactions(self, node, utxo, num_transactions):
         block = self.build_block_on_tip(node)
 
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             tx = CTransaction()
             tx.vin.append(CTxIn(COutPoint(utxo[0], utxo[1]), b''))
             tx.vout.append(CTxOut(utxo[2] - 100000, CScript([OP_TRUE, OP_DROP] * 15 + [OP_TRUE])))
@@ -578,7 +573,10 @@ class CompactBlocksTest(BitcoinTestFramework):
         # We should receive a getdata request
         wait_until(lambda: "getdata" in test_node.last_message, timeout=10, lock=mininode_lock)
         assert_equal(len(test_node.last_message["getdata"].inv), 1)
-        assert test_node.last_message["getdata"].inv[0].type == 2 or test_node.last_message["getdata"].inv[0].type == 2 | MSG_WITNESS_FLAG
+        assert test_node.last_message["getdata"].inv[0].type in [
+            2,
+            2 | MSG_WITNESS_FLAG,
+        ]
         assert_equal(test_node.last_message["getdata"].inv[0].hash, block.sha256)
 
         # Deliver the block
@@ -596,7 +594,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         MAX_GETBLOCKTXN_DEPTH = 10
         chain_height = node.getblockcount()
         current_height = chain_height
-        while (current_height >= chain_height - MAX_GETBLOCKTXN_DEPTH):
+        while current_height >= current_height - MAX_GETBLOCKTXN_DEPTH:
             block_hash = node.getblockhash(current_height)
             block = FromHex(CBlock(), node.getblock(block_hash, False))
 
@@ -642,7 +640,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         # Test that requesting old compactblocks doesn't work.
         MAX_CMPCTBLOCK_DEPTH = 5
         new_blocks = []
-        for i in range(MAX_CMPCTBLOCK_DEPTH + 1):
+        for _ in range(MAX_CMPCTBLOCK_DEPTH + 1):
             test_node.clear_block_announcement()
             new_blocks.append(node.generate(1)[0])
             wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)

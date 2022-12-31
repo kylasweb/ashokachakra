@@ -6,6 +6,7 @@
 Test addr relay
 """
 
+
 from test_framework.messages import (
     CAddress,
     NODE_NETWORK,
@@ -26,7 +27,7 @@ for i in range(10):
     addr = CAddress()
     addr.time = int(time.time()) + i
     addr.nServices = NODE_NETWORK | NODE_WITNESS
-    addr.ip = "123.123.123.{}".format(i % 256)
+    addr.ip = f"123.123.123.{i % 256}"
     addr.port = 8333 + i
     ADDRS.append(addr)
 

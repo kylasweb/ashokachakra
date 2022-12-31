@@ -28,7 +28,7 @@ def trueDummy(tx):
     scriptSig = CScript(tx.vin[0].scriptSig)
     newscript = []
     for i in scriptSig:
-        if (len(newscript) == 0):
+        if not newscript:
             assert len(i) == 0
             newscript.append(b'\x51')
         else:
@@ -45,10 +45,9 @@ class NULLDUMMYTest(BitcoinTestFramework):
         self.setup_clean_chain = True
         # This script tests NULLDUMMY activation, which is part of the 'segwit' deployment, so we go through
         # normal segwit activation here (and don't use the default always-on behaviour).
-        self.extra_args = [[
-            '-segwitheight='+str(segwitheight),
-            '-addresstype=legacy',
-        ]]
+        self.extra_args = [
+            [f'-segwitheight={str(segwitheight)}', '-addresstype=legacy']
+        ]
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()
@@ -60,10 +59,9 @@ class NULLDUMMYTest(BitcoinTestFramework):
         self.wit_ms_address = self.nodes[0].addmultisigaddress(1, [self.address], '', 'p2sh-segwit')['address']
 
         self.coinbase_blocks = self.nodes[0].generate(2)  # Block 2
-        coinbase_txid = []
-        for i in self.coinbase_blocks:
-            coinbase_txid.append(self.nodes[0].getblock(i)['tx'][0])
-
+        coinbase_txid = [
+            self.nodes[0].getblock(i)['tx'][0] for i in self.coinbase_blocks
+        ]
         for i in range(COINBASE_MATURITY):
             block = create_block(int(self.nodes[0].getbestblockhash(), 16), create_coinbase(self.nodes[0].getblockcount()+1), int(time.time())+2+i)
             block.nVersion = 4
@@ -75,7 +73,7 @@ class NULLDUMMYTest(BitcoinTestFramework):
         # Generate the number blocks signalling  that the continuation of the test case expects
         generatesynchronized(self.nodes[0], segwitheight-1-COINBASE_MATURITY-2-2, None, self.nodes)
         self.lastblockhash = self.nodes[0].getbestblockhash()
-        self.tip = int("0x" + self.lastblockhash, 0)
+        self.tip = int(f"0x{self.lastblockhash}", 0)
         self.lastblockheight = self.nodes[0].getblockcount()
         self.lastblocktime = int(time.time()) + self.lastblockheight + 1
 

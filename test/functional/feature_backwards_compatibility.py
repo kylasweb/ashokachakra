@@ -47,31 +47,33 @@ class BackwardsCompatibilityTest(BitcoinTestFramework):
         if os.getenv("TEST_PREVIOUS_RELEASES") == "false":
             raise SkipTest("backwards compatibility tests")
 
-        releases_path = os.getenv("PREVIOUS_RELEASES_DIR") or os.getcwd() + "/releases"
+        releases_path = os.getenv("PREVIOUS_RELEASES_DIR") or f"{os.getcwd()}/releases"
         if not os.path.isdir(releases_path):
             if os.getenv("TEST_PREVIOUS_RELEASES") == "true":
-                raise AssertionError("TEST_PREVIOUS_RELEASES=1 but releases missing: " + releases_path)
+                raise AssertionError(
+                    f"TEST_PREVIOUS_RELEASES=1 but releases missing: {releases_path}"
+                )
             raise SkipTest("This test requires binaries for previous releases")
 
-        self.add_nodes(self.num_nodes, extra_args=self.extra_args, versions=[
-            None,
-            None,
-            190000,
-            180100,
-            170100
-        ], binary=[
-            self.options.bitcoind,
-            self.options.bitcoind,
-            releases_path + "/v0.19.0.1/bin/bitcoind",
-            releases_path + "/v0.18.1/bin/bitcoind",
-            releases_path + "/v0.17.1/bin/bitcoind"
-        ], binary_cli=[
-            self.options.bitcoincli,
-            self.options.bitcoincli,
-            releases_path + "/v0.19.0.1/bin/bitcoin-cli",
-            releases_path + "/v0.18.1/bin/bitcoin-cli",
-            releases_path + "/v0.17.1/bin/bitcoin-cli"
-        ])
+        self.add_nodes(
+            self.num_nodes,
+            extra_args=self.extra_args,
+            versions=[None, None, 190000, 180100, 170100],
+            binary=[
+                self.options.bitcoind,
+                self.options.bitcoind,
+                f"{releases_path}/v0.19.0.1/bin/bitcoind",
+                f"{releases_path}/v0.18.1/bin/bitcoind",
+                f"{releases_path}/v0.17.1/bin/bitcoind",
+            ],
+            binary_cli=[
+                self.options.bitcoincli,
+                self.options.bitcoincli,
+                f"{releases_path}/v0.19.0.1/bin/bitcoin-cli",
+                f"{releases_path}/v0.18.1/bin/bitcoin-cli",
+                f"{releases_path}/v0.17.1/bin/bitcoin-cli",
+            ],
+        )
 
         self.start_nodes()
 

@@ -37,7 +37,7 @@ for folder in folders:
     for file in os.listdir(absFolder):
         extension = os.path.splitext(file)[1]
         if extension.lower() == '.png':
-            print("optimizing {}...".format(file), end =' ')
+            print(f"optimizing {file}...", end =' ')
             file_path = os.path.join(absFolder, file)
             fileMetaMap = {'file' : file, 'osize': os.path.getsize(file_path), 'sha256Old' : file_hash(file_path)}
             fileMetaMap['contentHashPre'] = content_hash(file_path)
@@ -51,14 +51,18 @@ for folder in folders:
 
             #verify
             if "Not a PNG file" in subprocess.check_output([pngcrush, "-n", "-v", file_path], stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf8'):
-                print("PNG file "+file+" is corrupted after crushing, check out pngcursh version")
+                print(
+                    f"PNG file {file} is corrupted after crushing, check out pngcursh version"
+                )
                 sys.exit(1)
 
             fileMetaMap['sha256New'] = file_hash(file_path)
             fileMetaMap['contentHashPost'] = content_hash(file_path)
 
             if fileMetaMap['contentHashPre'] != fileMetaMap['contentHashPost']:
-                print("Image contents of PNG file {} before and after crushing don't match".format(file))
+                print(
+                    f"Image contents of PNG file {file} before and after crushing don't match"
+                )
                 sys.exit(1)
 
             fileMetaMap['psize'] = os.path.getsize(file_path)
@@ -73,4 +77,6 @@ for fileDict in outputArray:
     noHashChange = noHashChange and (oldHash == newHash)
     print(fileDict['file']+"\n  size diff from: "+str(fileDict['osize'])+" to: "+str(fileDict['psize'])+"\n  old sha256: "+oldHash+"\n  new sha256: "+newHash+"\n")
 
-print("completed. Checksum stable: "+str(noHashChange)+". Total reduction: "+str(totalSaveBytes)+" bytes")
+print(
+    f"completed. Checksum stable: {str(noHashChange)}. Total reduction: {str(totalSaveBytes)} bytes"
+)

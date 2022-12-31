@@ -73,7 +73,13 @@ class ZMQTest (BitcoinTestFramework):
         rawblock = ZMQSubscriber(socket, b"rawblock")
         rawtx = ZMQSubscriber(socket, b"rawtx")
 
-        self.restart_node(0, ["-zmqpub%s=%s" % (sub.topic.decode(), address) for sub in [hashblock, hashtx, rawblock, rawtx]])
+        self.restart_node(
+            0,
+            [
+                f"-zmqpub{sub.topic.decode()}={address}"
+                for sub in [hashblock, hashtx, rawblock, rawtx]
+            ],
+        )
         connect_nodes(self.nodes[0], 1)
         socket.connect(address)
         # Relax so that the subscriber is ready before publishing zmq messages
@@ -142,7 +148,7 @@ class ZMQTest (BitcoinTestFramework):
         hashblock = ZMQSubscriber(socket, b'hashblock')
 
         # Should only notify the tip if a reorg occurs
-        self.restart_node(0, ['-zmqpub%s=%s' % (hashblock.topic.decode(), address)])
+        self.restart_node(0, [f'-zmqpub{hashblock.topic.decode()}={address}'])
         socket.connect(address)
         # Relax so that the subscriber is ready before publishing zmq messages
         sleep(0.2)

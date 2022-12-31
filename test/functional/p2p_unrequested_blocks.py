@@ -87,7 +87,7 @@ class AcceptBlockTest(BitcoinTestFramework):
 
         # 1. Have nodes mine a block (leave IBD)
         [n.generatetoaddress(1, n.get_deterministic_priv_key().address) for n in self.nodes]
-        tips = [int("0x" + n.getbestblockhash(), 0) for n in self.nodes]
+        tips = [int(f"0x{n.getbestblockhash()}", 0) for n in self.nodes]
 
         # 2. Send one block that builds on each tip.
         # This should be accepted by node0
@@ -105,7 +105,11 @@ class AcceptBlockTest(BitcoinTestFramework):
         self.log.info("First height 2 block accepted by node0; correctly rejected by node1")
 
         # 3. Send another block that builds on genesis.
-        block_h1f = create_block(int("0x" + self.nodes[0].getblockhash(0), 0), create_coinbase(1), block_time)
+        block_h1f = create_block(
+            int(f"0x{self.nodes[0].getblockhash(0)}", 0),
+            create_coinbase(1),
+            block_time,
+        )
         block_time += 1
         block_h1f.solve()
         test_node.send_and_ping(msg_block(block_h1f))

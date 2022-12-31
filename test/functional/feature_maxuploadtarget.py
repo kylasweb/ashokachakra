@@ -54,14 +54,7 @@ class MaxUploadTest(BitcoinTestFramework):
         # Generate some old blocks
         self.nodes[0].generate(530)
 
-        # p2p_conns[0] will only request old blocks
-        # p2p_conns[1] will only request new blocks
-        # p2p_conns[2] will test resetting the counters
-        p2p_conns = []
-
-        for _ in range(3):
-            p2p_conns.append(self.nodes[0].add_p2p_connection(TestP2PConn()))
-
+        p2p_conns = [self.nodes[0].add_p2p_connection(TestP2PConn()) for _ in range(3)]
         # Now mine a big block
         mine_large_block(self.nodes[0], self.utxo_cache)
 
@@ -101,7 +94,7 @@ class MaxUploadTest(BitcoinTestFramework):
         assert_equal(len(self.nodes[0].getpeerinfo()), 3)
         # At most a couple more tries should succeed (depending on how long
         # the test has been running so far).
-        for i in range(3):
+        for _ in range(3):
             p2p_conns[0].send_message(getdata_request)
         p2p_conns[0].wait_for_disconnect()
         assert_equal(len(self.nodes[0].getpeerinfo()), 2)

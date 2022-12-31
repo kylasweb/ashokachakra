@@ -19,13 +19,13 @@ class msg_unrecognized:
     command = b'badmsg'
 
     def __init__(self, *, str_data):
-        self.str_data = str_data.encode() if not isinstance(str_data, bytes) else str_data
+        self.str_data = str_data if isinstance(str_data, bytes) else str_data.encode()
 
     def serialize(self):
         return messages.ser_string(self.str_data)
 
     def __repr__(self):
-        return "{}(data={})".format(self.command, self.str_data)
+        return f"{self.command}(data={self.str_data})"
 
 
 class InvalidMessagesTest(BitcoinTestFramework):
@@ -116,7 +116,7 @@ class InvalidMessagesTest(BitcoinTestFramework):
 
         # TODO: handle larger-than cases. I haven't been able to pin down what behavior to expect.
         for wrong_size in (2, 77, 78, 79):
-            self.log.info("Sending a message with incorrect size of {}".format(wrong_size))
+            self.log.info(f"Sending a message with incorrect size of {wrong_size}")
 
             # Unmodified message should submit okay.
             node.p2p.send_and_ping(msg)

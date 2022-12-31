@@ -49,7 +49,7 @@ class ZMQHandler():
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawtx")
         self.zmqSubSocket.connect("tcp://127.0.0.1:%i" % port)
 
-    async def handle(self) :
+    async def handle(self):
         msg = await self.zmqSubSocket.recv_multipart()
         topic = msg[0]
         body = msg[1]
@@ -58,16 +58,16 @@ class ZMQHandler():
           msgSequence = struct.unpack('<I', msg[-1])[-1]
           sequence = str(msgSequence)
         if topic == b"hashblock":
-            print('- HASH BLOCK ('+sequence+') -')
+            print(f'- HASH BLOCK ({sequence}) -')
             print(binascii.hexlify(body))
         elif topic == b"hashtx":
-            print('- HASH TX  ('+sequence+') -')
+            print(f'- HASH TX  ({sequence}) -')
             print(binascii.hexlify(body))
         elif topic == b"rawblock":
-            print('- RAW BLOCK HEADER ('+sequence+') -')
+            print(f'- RAW BLOCK HEADER ({sequence}) -')
             print(binascii.hexlify(body[:80]))
         elif topic == b"rawtx":
-            print('- RAW TX ('+sequence+') -')
+            print(f'- RAW TX ({sequence}) -')
             print(binascii.hexlify(body))
         # schedule ourselves to receive the next message
         asyncio.ensure_future(self.handle())
